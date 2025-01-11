@@ -1,0 +1,12 @@
+{
+    "require": {
+        "php": ">=8.1",
+        "ngatngay/ngatngay": "dev-main",
+        "yahnis-elsts/plugin-update-checker": "^5.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "NgatNgay\\WordPress\\": "src/"
+        }
+    }
+}
