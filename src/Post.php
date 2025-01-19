@@ -2,10 +2,12 @@
 
 namespace NgatNgay\WordPress;
 
-use NgatNgay\Helper\Curl;
+use NgatNgay\Http\Curl;
 
 class Post
 {
+    private static string $thumbnail = '';
+    
     public static function getIdBySlug($slug, $type = 'post')
     {
         $post = \get_posts([
@@ -40,6 +42,18 @@ class Post
         ]);
     }
 
+    public static function getThumbnailUrl($post = null) {
+        if (has_post_thumbnail($post)) {
+            return get_the_post_thumbnail_url();
+        } else {
+            return self::$thumbnail;
+        }
+    }
+    
+    public static function setDefaultThumbnail(string $thumbnail) {
+        self::$thumbnail = $thumbnail;
+    }
+    
     public static function setThumbnailUrl($post, $thumbUrl)
     {
         $curl = new Curl();
@@ -64,7 +78,11 @@ class Post
         set_post_thumbnail($post, $attachId);
     }
 
-    // module
+    /**
+     * @param int $post
+     * @param string $taxonomy
+     * @return array|bool|\WP_Error
+     */
     public static function getTerms(int $post, string $taxonomy)
     {
         $res = get_the_terms($post ?: get_the_ID(), $taxonomy);
@@ -74,7 +92,6 @@ class Post
     public static function getView(int $postId = 0, string $type = '')
     {
         $key = $type ? "view_$type" : 'view';
-
         return (int) get_post_meta($postId ?: get_the_ID(), $key, true);
     }
     public static function showView(int $postId = 0, string $type = '')
@@ -104,7 +121,7 @@ class Post
     }
 
     // primary category
-    public static function getPrimaryCategory(int $id = 0)
+    public static function getPrimaryCategory(int $id = 0): \WP_Term|null
     {
         $termId = (int) get_post_meta($id ?: get_the_ID(), 'primary_category', true);
         $term = get_term($termId);
@@ -115,9 +132,16 @@ class Post
 
         return null;
     }
-    public static function setPrimaryCategory(int $id = 0, int $categoryId)
+
+    /**
+     * Summary of setPrimaryCategory
+     * @param int $id
+     * @param int $categoryId
+     * @return bool|int
+     */
+    public static function setPrimaryCategory(int $id, int $categoryId)
     {
-        update_post_meta($id ?: get_the_ID(), 'primary_category', $categoryId);
+        return update_post_meta($id ?: get_the_ID(), 'primary_category', $categoryId);
     }
 
     public static function supportPrimaryCategory()

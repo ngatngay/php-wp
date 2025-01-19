@@ -2,7 +2,7 @@
 
 /*
  * Plugin Name: WordPress Helper
- * Version: 1.6
+ * Version: 1.9
  */
 
 defined('ABSPATH') or exit;
