@@ -1,17 +1,16 @@
 <?php
 
-namespace NgatNgay\WordPress;
+namespace wpx;
 
-class MetaBox
+class metabox
 {
-    private static $prefix = 'pe_';
+    private static string $prefix = 'pe_';
 
-    public static function add($args)
+    public static function add(array $args)
     {
-        // server
-        add_action('save_post', $args['execute']);
-
         $prefix = self::$prefix . $args['id'];
+
+        add_action('save_post', $args['execute']);
         add_action('add_meta_boxes', function () use ($prefix, $args) {
             add_meta_box(
                 $prefix,

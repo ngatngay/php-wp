@@ -1,22 +1,24 @@
 <?php
 
-namespace NgatNgay\WordPress;
+namespace wpx;
 
 use function NgatNgay\{request};
 
-class Theme
+class theme
 {
-    public static string $logo = '';
+    private static string $logo = '';
 
-    public static function url() {
+    public static function url()
+    {
         return get_theme_file_uri();
     }
 
-    public static function path() {
+    public static function path()
+    {
         return get_template_directory();
     }
 
-    public static function getLogo(): string
+    public static function get_logo(): string
     {
         $logoId = get_theme_mod('custom_logo');
         $logo = wp_get_attachment_image_src($logoId, 'full');
@@ -27,12 +29,13 @@ class Theme
             return self::$logo;
         }
     }
-    public static function setDefaultLogo($logo): void
+
+    public static function set_default_logo($logo): void
     {
         self::$logo = $logo;
     }
 
-    public static function addUrl($key, $regexUrl, $callback): void
+    public static function add_url($key, $regexUrl, $callback): void
     {
         add_action('init', function () use ($key, $regexUrl) {
             add_rewrite_rule($regexUrl, 'index.php?ngatngay_rewrite=' . $key, 'top');

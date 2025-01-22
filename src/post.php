@@ -1,25 +1,20 @@
 <?php
 
-namespace NgatNgay\WordPress;
+namespace wpx;
 
 use NgatNgay\Http\Curl;
 
-class Post
-{
-    private static string $thumbnail = '';
+class post {
+    private static $thumbnail = '';
     
-    public static function getIdBySlug($slug, $type = 'post')
+    public static function get_id_by_slug(string $slug, string $type = 'post')
     {
-        $post = \get_posts([
-            'name' => $slug,
-            'numberposts' => 1,
-            'post_type' => $type
-        ]);
+        $post = get_page_by_path($slug, OBJECT, $type);
 
-        return $post ? $post[0]->ID : 0;
+        return $post ? $post->ID : 0;
     }
 
-    public static function insertOrUpdate($data)
+    public static function insert_or_update($data)
     {
         if ($data['ID'] === 0) {
             $post = wp_insert_post($data, true);
@@ -34,7 +29,7 @@ class Post
         return $post;
     }
 
-    public static function getRandom($limit = 10)
+    public static function get_random($limit = 10)
     {
         return get_posts([
             'posts_per_page' => $limit,
@@ -42,7 +37,7 @@ class Post
         ]);
     }
 
-    public static function getThumbnailUrl($post = null) {
+    public static function get_thumbnail_url($post = null) {
         if (has_post_thumbnail($post)) {
             return get_the_post_thumbnail_url();
         } else {
@@ -50,11 +45,11 @@ class Post
         }
     }
     
-    public static function setDefaultThumbnail(string $thumbnail) {
+    public static function set_default_thumbnail(string $thumbnail) {
         self::$thumbnail = $thumbnail;
     }
     
-    public static function setThumbnailUrl($post, $thumbUrl)
+    public static function set_thumbnail_url($post, $thumbUrl)
     {
         $curl = new Curl();
         $postData = get_post($post);
@@ -83,20 +78,21 @@ class Post
      * @param string $taxonomy
      * @return array|bool|\WP_Error
      */
-    public static function getTerms(int $post, string $taxonomy)
+    public static function get_terms(int $post, string $taxonomy)
     {
         $res = get_the_terms($post ?: get_the_ID(), $taxonomy);
         return $res ?: [];
     }
     // view
-    public static function getView(int $postId = 0, string $type = '')
+    public static function get_view(int $postId = 0, string $type = '')
     {
         $key = $type ? "view_$type" : 'view';
         return (int) get_post_meta($postId ?: get_the_ID(), $key, true);
     }
-    public static function showView(int $postId = 0, string $type = '')
+    
+    public static function show_view(int $postId = 0, string $type = '')
     {
-        $view = self::getView($postId, $type);
+        $view = self::get_view($postId, $type);
 
         if ($view >= 1000) {
             $view = number_format($view / 1000, 1);
@@ -105,23 +101,23 @@ class Post
 
         echo $view;
     }
-    public static function updateView(int $postId = 0, string $type = 'all', int $inc = 1)
+    public static function update_view(int $postId = 0, string $type = 'all', int $inc = 1)
     {
         $key = $type ? "view_$type" : 'view';
         $postId = $postId ?: get_the_ID();
 
         if ($type === 'all') {
-            update_post_meta($postId, 'view', self::getView($postId) + $inc);
-            update_post_meta($postId, 'view_day', self::getView($postId, 'day') + $inc);
-            update_post_meta($postId, 'view_week', self::getView($postId, 'week') + $inc);
-            update_post_meta($postId, 'view_month', self::getView($postId, 'month') + $inc);
+            update_post_meta($postId, 'view', self::get_view($postId) + $inc);
+            update_post_meta($postId, 'view_day', self::get_view($postId, 'day') + $inc);
+            update_post_meta($postId, 'view_week', self::get_view($postId, 'week') + $inc);
+            update_post_meta($postId, 'view_month', self::get_view($postId, 'month') + $inc);
         } else {
-            update_post_meta($postId, $key, self::getView($postId, $type) + $inc);
+            update_post_meta($postId, $key, self::get_view($postId, $type) + $inc);
         }
     }
 
     // primary category
-    public static function getPrimaryCategory(int $id = 0): \WP_Term|null
+    public static function get_primary_category(int $id = 0): \WP_Term|null
     {
         $termId = (int) get_post_meta($id ?: get_the_ID(), 'primary_category', true);
         $term = get_term($termId);
@@ -139,15 +135,15 @@ class Post
      * @param int $categoryId
      * @return bool|int
      */
-    public static function setPrimaryCategory(int $id, int $categoryId)
+    public static function set_primary_category(int $id, int $categoryId)
     {
         return update_post_meta($id ?: get_the_ID(), 'primary_category', $categoryId);
     }
 
-    public static function supportPrimaryCategory()
+    public static function support_primary_category()
     {
         add_action('add_meta_boxes', function () {
-            $primaryCategory = function () {
+            $primary_category = function () {
                 $postId = get_the_ID();
                 $primary = (int) get_post_meta($postId, 'primary_category', true);
 
@@ -160,34 +156,29 @@ class Post
             add_meta_box(
                 'primary_category',
                 'Primary Category',
-                $primaryCategory,
-                'post',
-                //'normal',
-                //'high'
+                $primary_category,
+                'post'
             );
         });
 
         add_action('save_post', function ($postId) {
             update_post_meta($postId, 'primary_category', (int) ($_POST['primary_category'] ?? 0));
         });
-
     }
 
     // like
-    public static function showLike($postId = 0)
+    public static function show_like(int $id = 0)
     {
-        $postId = $postId ?: get_the_ID();
-        echo (int) get_post_meta($postId, 'like', true);
+        echo (int) get_post_meta($id ?: get_the_ID(), 'like', true);
     }
 
     // date
-    public static function showCreatedAgo($post = null)
+    public static function get_created_ago($post = null)
     {
-        $date = get_the_date('c', $post);
-        return timeAgo(strtotime($date));
+        return time_ago(strtotime(get_the_date('c', $post)));
     }
 
-    public static function removeAll()
+    public static function remove_all()
     {
         $posts = get_posts([
             'numberposts' => -1
@@ -199,5 +190,4 @@ class Post
             }
         }
     }
-
 }

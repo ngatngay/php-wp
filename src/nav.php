@@ -1,8 +1,8 @@
 <?php
 
-namespace NgatNgay\WordPress;
+namespace wpx;
 
-class Nav
+class nav
 {
     public static function get($menu)
     {
@@ -10,8 +10,6 @@ class Nav
             $data = [];
 
             foreach ($array as $value) {
-                //var_dump($array, $value);
-
                 if ($value->menu_item_parent !== "$parent") {
                     continue;
                 }

@@ -2,22 +2,23 @@
 
 /*
  * Plugin Name: WordPress Helper
- * Version: 1.9
+ * Version: 1.10
  */
+
+namespace wpx;
 
 defined('ABSPATH') or exit;
 
-use NgatNgay\WordPress\Updater;
-use NgatNgay\WordPress\Cron;
-
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
 // require
 if (defined('DISABLE_WP_CRON') && DISABLE_WP_CRON) {
     wp_die('cron are disable');
 }
 
-Cron::add('ngatngay', function () {
+cron::add('ngatngay', function () {
+    init();
+        
     file_get_contents('https://xn--ngc-bmz.vn/api/monitor?key=ngatngay&name=' . rawurldecode(get_site_url()) . '&type=wordpress');
 }, ['repeat' => 'hourly']);
 
@@ -37,7 +38,7 @@ register_activation_hook(__FILE__, function () {
 });
 
 // update
-Updater::init(
+updater::init(
     'https://cdn.ngatngay.net/wp/ngatngay/plugin.json',
     __FILE__
 );
